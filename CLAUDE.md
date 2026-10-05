@@ -14,7 +14,7 @@ Principio: capturar y mover tareas tiene que ser "pim pam". Una línea de texto 
 {
   "v": 1,
   "settings": { "captureIn": "week", "waitDays": 5, "warnToday": 5, "theme": "light" },
-  "programs":  [{ "id": "p1", "name": "ALPHA" }, { "id": "p2", "name": "Catálogo y Taller de Precios" }],
+  "programs":  [{ "id": "p1", "name": "ALPHA", "color": "#3d7ebf" }, { "id": "p2", "name": "Catálogo y Taller de Precios", "color": "#2e9e7a" }],
   "projects":  [{ "id": "pr1", "programId": "p1", "name": "Norte", "fav": true }],
   "people":    [{ "id": "me", "name": "Yo", "color": "black" }, { "id": "u1", "name": "Marta", "color": "blue" }],
   "tasks": [{
@@ -62,9 +62,7 @@ Referencia visual: la maqueta acordada (panel Hoy grande a la izquierda, listas 
 ## Colores
 Dos dimensiones separadas:
 
-**Sin punto de tipo.** Urgente: barra roja `#c2321e` a la izquierda, título en 600 y fondo `#fff7f5`. **Tarjeta ámbar** (fondo `#faf6f1`, borde `#dccbb8`): la tarea es de otra persona (chip ≠ Yo) o es un reclamo que vuelve de Esperando. Si es urgente y de otra persona, fondo ámbar con barra roja.
-
-**Sin proyecto:** aviso en chip rosa con borde discontinuo (`#f8dde6` / `#8c2f52`), "sin proyecto" en tarjetas y "sin proy." en filas; clic abre el desplegable de proyecto.
+**Punto = programa** (delante del título; 12 px en tarjetas de Hoy, 9 px en filas). Color por programa, de una paleta de 8 (`#3d7ebf #2e9e7a #8a5fc4 #e07b39 #1f9aa5 #d0527f #8d9a1f #6b7889`) asignada en orden al crear programas y editable en Ajustes. Sin proyecto asociado: punto rosa discontinuo (`#f8dde6` / `#8c2f52`). Clic en el punto abre el desplegable de proyecto. Tarjetas y filas muestran además el chip del proyecto. No hay punto de tipo. Urgente: barra roja `#c2321e` a la izquierda, título en 600 y fondo `#fff7f5`. **Tarjeta ámbar** (fondo `#faf6f1`, borde `#dccbb8`): la tarea es de otra persona (chip ≠ Yo) o es un reclamo que vuelve de Esperando. Si es urgente y de otra persona, fondo ámbar con barra roja.
 
 **Chip = persona**. "Depende de alguien" no es un tipo: es que el chip no es Yo, y la tarjeta se pinta ámbar. Paleta de 8, fondo claro + texto oscuro (contraste ≥ 4.5:1), asignada en orden al crear personas; Yo siempre negro/blanco:
 
