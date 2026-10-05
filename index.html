@@ -380,8 +380,8 @@ function renderFoot(){
   const f = UI.file;
   let st;
   if(f.state === 'ok') st = `Guardado en ${esc(f.name)} · ${f.time}`;
-  else if(f.state === 'perm') st = `Archivo vinculado (${esc(f.name)}) · <button class="linkbtn" data-act="perm">dar permiso</button>`;
-  else if(f.state === 'err') st = `<span style="color:var(--red)">Error con ${esc(f.name)}</span> · <button class="linkbtn" data-act="perm">reintentar</button>`;
+  else if(f.state === 'perm') st = `<span style="color:var(--red)">Sin permiso para guardar en ${esc(f.name)}${dirty ? ' · cambios sin guardar' : ''}</span> · <button class="linkbtn" data-act="perm">dar permiso</button>`;
+  else if(f.state === 'err') st = `<span style="color:var(--red)">No se pudo guardar en ${esc(f.name)}${dirty ? ' · cambios sin guardar' : ''}</span> · <button class="linkbtn" data-act="perm">reintentar</button>`;
   else st = 'Solo navegador · vincular archivo en Ajustes';
   document.getElementById('foot').innerHTML =
     `<span><span class="lg"><i style="background:var(--red)"></i>urgente</span><span class="lg"><i style="background:var(--claim-bg);border:1px solid var(--wait-line)"></i>de otra persona / reclamo</span><span class="lg">· chip de color = persona</span></span><span class="sp"></span><span>${st}</span>`;
@@ -424,15 +424,21 @@ async function idbGet(k){ const db = await idb(); return new Promise((res,rej) =
 async function idbSet(k,v){ const db = await idb(); return new Promise((res,rej) => { const tx = db.transaction('kv','readwrite'); tx.objectStore('kv').put(v,k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
 async function idbDel(k){ const db = await idb(); return new Promise((res,rej) => { const tx = db.transaction('kv','readwrite'); tx.objectStore('kv').delete(k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
 function lsSave(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+const DIRTY_KEY = 'tareas.v1.dirty';
+let dirty = false;
+try{ dirty = localStorage.getItem(DIRTY_KEY) === '1'; }catch(e){}
+function setDirty(v){ dirty = v; try{ v ? localStorage.setItem(DIRTY_KEY,'1') : localStorage.removeItem(DIRTY_KEY); }catch(e){} }
 function save(){
   lsSave();
-  if(fh){ clearTimeout(saveTimer); saveTimer = setTimeout(writeFile, 500); }
+  if(fh){ setDirty(true); clearTimeout(saveTimer); saveTimer = setTimeout(writeFile, 500); }
 }
+window.addEventListener('beforeunload', e => { if(fh && dirty){ e.preventDefault(); e.returnValue = ''; } });
 async function writeFile(){
   if(!fh) return;
   try{
     const w = await fh.createWritable();
     await w.write(JSON.stringify(S,null,2)); await w.close();
+    setDirty(false);
     UI.file = {state:'ok',name:fh.name,time:hhmm()};
   }catch(e){ UI.file = {state:'err',name:fh.name,time:''}; }
   renderFoot();
@@ -443,15 +449,21 @@ async function readFile(){
     if(txt.trim()){
       const d = normalize(JSON.parse(txt));
       if(!d) throw new Error('formato');
-      S = d; lsSave();
-      UI.file = {state:'ok',name:fh.name,time:hhmm()};
+      if(dirty && !confirm('Hay cambios que no llegaron a guardarse en ' + fh.name + '.\n\nAceptar: guardar en el archivo lo que ves ahora (sustituye el contenido del archivo).\nCancelar: descartar esos cambios y cargar el archivo.')){
+        S = d; lsSave(); setDirty(false);
+        UI.file = {state:'ok',name:fh.name,time:hhmm()};
+      }else if(dirty) await writeFile();
+      else{ S = d; lsSave(); UI.file = {state:'ok',name:fh.name,time:hhmm()}; }
     }else await writeFile();
   }catch(e){ UI.file = {state:'err',name:fh.name,time:''}; }
   render();
 }
+let permBusy = false;
 async function askPerm(){
-  if(!fh) return;
+  if(!fh || permBusy) return;
+  permBusy = true;
   try{ if(await fh.requestPermission({mode:'readwrite'}) === 'granted') await readFile(); }catch(e){}
+  permBusy = false;
 }
 async function linkFile(mode){
   try{
@@ -463,7 +475,7 @@ async function linkFile(mode){
     render(); openSettings();
   }catch(e){ /* cancelado */ }
 }
-async function unlinkFile(){ fh = null; try{ await idbDel('handle'); }catch(e){} UI.file = {state:'none',name:'',time:''}; renderFoot(); openSettings(); }
+async function unlinkFile(){ fh = null; setDirty(false); try{ await idbDel('handle'); }catch(e){} UI.file = {state:'none',name:'',time:''}; renderFoot(); openSettings(); }
 async function init(){
   let d = null;
   try{ d = normalize(JSON.parse(localStorage.getItem(KEY))); }catch(e){}
@@ -883,6 +895,8 @@ document.getElementById('filters').addEventListener('click', e => {
   else if(k === 'prj') f.projectId = f.projectId === b.dataset.id ? null : b.dataset.id;
   render();
 });
+let permAsked = false;
+document.addEventListener('click', () => { if(UI.file.state === 'perm' && !permAsked){ permAsked = true; askPerm(); } });
 document.getElementById('foot').addEventListener('click', e => { if(e.target.closest('[data-act="perm"]')) askPerm(); });
 
 document.addEventListener('mousedown', e => {
