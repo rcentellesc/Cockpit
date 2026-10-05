@@ -20,7 +20,7 @@ Principio: capturar y mover tareas tiene que ser "pim pam". Una línea de texto 
   "tasks": [{
     "id": "t1", "title": "Pedir presupuesto licencias",
     "personId": "u1", "projectId": "pr1",
-    "type": "hacer | reclamar | urgente",
+    "type": "hacer | urgente",
     "date": "2026-10-08",
     "waiting": false, "remindOn": null,
     "note": "", "order": 0,
@@ -46,15 +46,15 @@ Las columnas se derivan de `date` / `waiting` cada vez que se renderiza, con la 
 | Más adelante | `date` posterior |
 | Esperando | `waiting` y `remindOn > hoy` |
 
-Semana empieza en lunes. Hoy no tiene límite; si hay más de `warnToday` tareas, el contador se pone en rojo con texto "demasiadas, reparte". Las de Esperando que llegan a Hoy se muestran como reclamo (punto ámbar, fondo ámbar suave) y con texto "reclamar · desde dd/mm".
+Semana empieza en lunes. Hoy no tiene límite; si hay más de `warnToday` tareas, el contador se pone en rojo con texto "demasiadas, reparte". Las de Esperando que llegan a Hoy se muestran como reclamo (fondo ámbar suave) y con texto "reclamar · desde dd/mm".
 
 ## Layout
 Pantalla de escritorio, 1280+ px. Fondo claro `#f3f2ee`, tipografía system-ui (sin fuentes externas), texto `#1b1b1a`.
 
 1. **Cabecera**: título, fecha de hoy. A la derecha: filtros (ver abajo), botón Hechas (N), botón Ajustes.
 2. **Línea rápida**: input grande (46 px, 16 px de texto). Debajo, una línea de ayuda con la sintaxis y los atajos.
-3. **Hoy**: panel blanco a la izquierda, ~35 % del ancho. Tarjetas grandes: título 16 px, punto de tipo 12 px, chip de persona, chip de proyecto, fecha, y botones siempre visibles: `→ mañ`, `→ vie`, `⏸ espera`, `✓`. Orden manual por arrastre dentro de Hoy.
-4. **Resto**: cinco columnas a la derecha en formato lista compacta (una fila = punto 9 px + título 13 px; segunda línea chip persona + fecha). Sin botones visibles; al pasar el ratón aparecen: sol (a Hoy), `→ mañ`, `⏸`, `✓`. Esperando con fondo `#f1eae1`, borde `#dccbb8`, cabecera ámbar, y la fecha de cada fila dice "reclamar jue 8".
+3. **Hoy**: panel blanco a la izquierda, ~35 % del ancho. Tarjetas grandes: título 16 px, chip de persona, chip de proyecto, fecha, y botones siempre visibles: `→ mañ`, `→ vie`, `⏸ espera`, `✓`. Orden manual por arrastre dentro de Hoy.
+4. **Resto**: cinco columnas a la derecha en formato lista compacta (una fila = título 13 px; segunda línea chip persona + fecha). Sin botones visibles; al pasar el ratón aparecen: sol (a Hoy), `→ mañ`, `⏸`, `✓`. Esperando con fondo `#f1eae1`, borde `#dccbb8`, cabecera ámbar, y la fecha de cada fila dice "reclamar jue 8".
 5. **Pie**: leyenda de colores y estado de guardado ("Guardado en tareas.json · hh:mm" o "Solo navegador · vincular archivo en Ajustes").
 
 Referencia visual: la maqueta acordada (panel Hoy grande a la izquierda, listas compactas a la derecha). No copiar el estilo del Cockpit: nada de campos "Persona / Fecha límite" vacíos en cada tarjeta.
@@ -62,9 +62,9 @@ Referencia visual: la maqueta acordada (panel Hoy grande a la izquierda, listas 
 ## Colores
 Dos dimensiones separadas:
 
-**Punto = tipo** (3 valores): hacer `#1b1b1a` · reclamar ámbar `#a0620f` · urgente rojo `#c2321e`. Urgente además: título en 600 y fondo de tarjeta `#fff7f5`. Reclamo: fondo `#faf6f1`.
+**Sin punto de tipo.** Urgente: barra roja `#c2321e` a la izquierda, título en 600 y fondo `#fff7f5`. **Tarjeta ámbar** (fondo `#faf6f1`, borde `#dccbb8`): la tarea es de otra persona (chip ≠ Yo) o es un reclamo que vuelve de Esperando. Si es urgente y de otra persona, fondo ámbar con barra roja.
 
-**Chip = persona**. "Depende de alguien" no es un tipo: es que el chip no es Yo. Paleta de 8, fondo claro + texto oscuro (contraste ≥ 4.5:1), asignada en orden al crear personas; Yo siempre negro/blanco:
+**Chip = persona**. "Depende de alguien" no es un tipo: es que el chip no es Yo, y la tarjeta se pinta ámbar. Paleta de 8, fondo claro + texto oscuro (contraste ≥ 4.5:1), asignada en orden al crear personas; Yo siempre negro/blanco:
 
 | nombre | fondo | texto |
 |---|---|---|
@@ -83,7 +83,7 @@ Un input. Intro crea la tarea y vacía el input. Sintaxis, en cualquier orden:
 - `@nombre` persona. Al teclear `@` se abre un desplegable con las personas guardadas, filtrando al escribir; flechas + Intro o clic selecciona. Última opción siempre "Crear persona: xxx"; una persona nueva **solo** se crea eligiendo esa opción explícitamente, nunca por un texto suelto. Nueva persona recibe el siguiente color de la paleta.
 - `#proyecto` idéntico, con "Crear proyecto: xxx" (pide el programa en un desplegable pequeño).
 - Fecha: `hoy`, `mañ`/`mañana`, `lun`…`dom` (próximo día de esa semana; si es hoy, hoy), `12/10`, `12/10/26`, `+3` (días), `nov`/`dic`… (día 1 del mes). Admite acentos y mayúsculas.
-- `!` urgente. `?` reclamar. Sin marca: hacer.
+- `!` urgente. Sin marca: hacer. (`?` no tiene significado.)
 - Sin `@`: persona Yo. Sin fecha: según `settings.captureIn` (por defecto `week` = viernes de esta semana; si hoy es viernes o después, viernes de la siguiente). Opciones: today, tomorrow, week, nextweek.
 
 Lo que queda después de extraer los tokens es el título, recortado.
@@ -95,17 +95,17 @@ Tres caminos, los tres cambian `date`/`waiting`:
 - **Teclado** con una fila seleccionada (clic o flechas arriba/abajo): `H` hoy · `M` mañana · `S` esta semana (viernes) · `P` próxima semana (lunes) · `L` más adelante (+30 días) · `E` esperando · `X` o `Supr` hecha · `Intro` abrir edición · `Esc` deseleccionar.
 - **Arrastre** entre columnas: soltar en Mañana → hoy+1; Esta semana → viernes de esta semana (si hoy ≥ viernes, viernes siguiente); Próxima semana → lunes siguiente; Más adelante → +30 días; Esperando → `waiting=true`, `remindOn = hoy + settings.waitDays`; Hoy → hoy. Dentro de Hoy, arrastrar reordena (`order`).
 
-Pasar a Esperando desde botón o tecla usa `remindOn = hoy + waitDays`. Sol en una tarea de Esperando = reclamar ya: `waiting=false`, `date=hoy`, tipo `reclamar`.
+Pasar a Esperando desde botón o tecla usa `remindOn = hoy + waitDays`. Sol en una tarea de Esperando = reclamar ya: `waiting=false`, `date=hoy`. Tecla `U` alterna urgente.
 
 Hecha: `done=true, doneAt=ahora`; desaparece de las columnas. Botón "Hechas (N)" muestra una lista con fecha y permite recuperar. Las hechas de más de 90 días se pueden purgar desde Ajustes.
 
 ## Editar
-**En sitio**, sin abrir nada: clic en título → edición inline (Intro guarda, Esc cancela; acepta la misma sintaxis `@ # ! ?` y la aplica). Clic en chip persona → desplegable (incluye Yo). Clic en punto → rota hacer → reclamar → urgente. Clic en fecha → selector con atajos hoy · mañ · vie · lun + calendario nativo. Clic en chip proyecto → desplegable.
+**En sitio**, sin abrir nada: clic en título → edición inline (Intro guarda, Esc cancela; acepta la misma sintaxis `@ # !` y la aplica). Clic en chip persona → desplegable (incluye Yo). Clic en fecha → selector con atajos hoy · mañ · vie · lun + calendario nativo. Clic en chip proyecto → desplegable.
 
 **Panel lateral** (doble clic o Intro): todos los campos + nota libre (`note`, textarea) + botón Borrar (con confirmación). Esc cierra.
 
 ## Filtros
-Cabecera: chip "Todo", "Mías" (persona = Yo), "Reclamar" (tipo reclamar o waiting), y pestañas por programa; con un programa activo aparecen los chips de sus proyectos. Un filtro afecta a todas las columnas. `/` enfoca un buscador de texto que filtra por título y nota.
+Cabecera: chip "Todo", "Mías" (persona = Yo), "Reclamar" (persona ≠ Yo o waiting), y pestañas por programa; con un programa activo aparecen los chips de sus proyectos. Un filtro afecta a todas las columnas. `/` enfoca un buscador de texto que filtra por título y nota.
 
 ## Atajos globales
 `N` enfoca la línea rápida · `/` buscador · `?` muestra la tabla de atajos. Las teclas de mover solo actúan con una fila seleccionada y nunca mientras se escribe en un input.

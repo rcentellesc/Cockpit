@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tareas</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2256%22%20fill%3D%22%231b1b1a%22%2F%3E%3Cpath%20d%3D%22M62%20136l44%2044%2076-92%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%2230%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22198%22%20cy%3D%2260%22%20r%3D%2224%22%20fill%3D%22%23d98b2b%22%2F%3E%3C%2Fsvg%3E">
 <style>
 :root{
   --bg:#f3f2ee;--panel:#fff;--text:#1b1b1a;--muted:#5b5a56;--line:#e2e0d9;--line2:#c9c7c0;--soft:#fafaf8;--hover:#ebe9e2;--future:#2f6aa3;
@@ -60,9 +61,11 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .empty{color:var(--muted);font-size:12px;padding:8px 4px}
 /* tarjetas Hoy */
 .card{position:relative;border:1px solid var(--line);border-radius:8px;padding:12px 12px 10px;background:var(--panel)}
-.card.urgente{background:var(--urgent-bg)}
-.card.claim{background:var(--claim-bg)}
-.card.sel,.row.sel{box-shadow:0 0 0 2px var(--accent)}
+.card.urgente{background:var(--urgent-bg);border-left:3px solid var(--red)}
+.card.other,.card.claim{background:var(--claim-bg);border-color:var(--wait-line)}
+.card.urgente.other{background:var(--claim-bg);border-left-color:var(--red)}
+.card.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.row.sel{background:var(--panel);box-shadow:inset 0 0 0 1px var(--accent)}
 .c-top{display:flex;gap:10px;align-items:flex-start}
 .c-top .title{font-size:16px;line-height:1.3;flex:1;word-break:break-word;cursor:text}
 .c-top .dtxt{margin-top:1px;flex:none}
@@ -73,10 +76,6 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .c-btns button:hover{background:var(--hover)}
 .c-btns .ok{background:var(--text);color:var(--bg);border-color:var(--text);padding:0 10px}
 .claimtxt{color:var(--amber);font-size:12px;font-weight:600}
-.dot{flex:none;border:0;padding:0;border-radius:50%;background:var(--dot-do);width:12px;height:12px;margin-top:5px;position:relative}
-.dot::after{content:"";position:absolute;inset:-6px}
-.dot.reclamar{background:var(--amber)}.dot.urgente{background:var(--red)}
-.s9 .dot,.dot.s9{width:9px;height:9px;margin-top:5px}
 .chip{border:0;border-radius:10px;padding:2px 9px;font-size:12px;font-weight:500;line-height:1.35;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip.me{background:var(--me-bg);color:var(--me-fg)}
 .chip.proj{background:var(--bg);border-radius:4px;padding:2px 8px;color:var(--muted);font-weight:400}
@@ -91,8 +90,11 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .row .r1{display:flex;gap:7px;align-items:flex-start}
 .row .title{font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:text}
 .row.urgente .title{font-weight:600}
-.row.urgente{background:var(--urgent-bg)}
-.row .r2{display:flex;gap:6px;align-items:center;margin:3px 0 0 16px;min-width:0;font-size:11px}
+.row.urgente{background:var(--urgent-bg);border-left:3px solid var(--red)}
+.row.other{background:var(--claim-bg)}
+.row.urgente.other{background:var(--claim-bg)}
+.row.sel.other,.row.sel.urgente{background:var(--panel)}
+.row .r2{display:flex;gap:6px;align-items:center;margin:3px 0 0 0;min-width:0;font-size:11px}
 .row .r2 .chip{font-size:11px;font-weight:400;padding:1px 7px;border-radius:9px}
 .row .r2 .dtxt{margin-left:auto;font-size:11px}
 .hb{display:none;position:absolute;right:3px;top:3px;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:1px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
@@ -152,7 +154,7 @@ kbd{background:var(--hover);border:1px solid var(--line);border-radius:4px;paddi
 </header>
 <div class="quick">
   <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Nueva tarea…  ej: Pedir presupuesto @Marta #Norte vie !" aria-label="Línea rápida">
-  <div class="help"><b>@</b>persona · <b>#</b>proyecto · <b>hoy mañ lun…dom 12/10 +3 nov</b> fecha · <b>!</b> urgente · <b>?</b> reclamar &nbsp;|&nbsp; <kbd>N</kbd> nueva · <kbd>/</kbd> buscar · <kbd>?</kbd> atajos · con fila seleccionada: <kbd>H</kbd> <kbd>M</kbd> <kbd>S</kbd> <kbd>P</kbd> <kbd>L</kbd> <kbd>E</kbd> <kbd>X</kbd></div>
+  <div class="help"><b>@</b>persona · <b>#</b>proyecto · <b>hoy mañ lun…dom 12/10 +3 nov</b> fecha · <b>!</b> urgente &nbsp;|&nbsp; <kbd>N</kbd> nueva · <kbd>/</kbd> buscar · <kbd>?</kbd> atajos · con fila seleccionada: <kbd>H</kbd> <kbd>M</kbd> <kbd>S</kbd> <kbd>P</kbd> <kbd>L</kbd> <kbd>E</kbd> <kbd>U</kbd> <kbd>X</kbd></div>
 </div>
 <main id="board"></main>
 <footer id="foot"></footer>
@@ -176,7 +178,7 @@ const COLS = [
   {k:'next',n:'Próxima semana'},{k:'later',n:'Más adelante'},{k:'waiting',n:'Esperando'}
 ];
 const COLNAME = Object.fromEntries(COLS.map(c => [c.k, c.n]));
-const TYPES = ['hacer','reclamar','urgente'];
+
 let S;
 const UI = { filter:{kind:'all',programId:null,projectId:null,q:''}, sel:null, order:[], drag:null, panel:null, modal:null, file:{state:'none',name:'',time:''} };
 
@@ -202,7 +204,7 @@ function normalize(d){
   if(!x.programs.length) x.programs.push({id:'p1',name:'General'});
   x.tasks = d.tasks.map((t,i) => Object.assign({
     id:uid('t'),title:'',personId:'me',projectId:null,type:'hacer',date:today(),waiting:false,remindOn:null,
-    note:'',order:i,done:false,doneAt:null,createdAt:new Date().toISOString()}, t));
+    note:'',order:i,done:false,doneAt:null,createdAt:new Date().toISOString()}, t, t.type === 'urgente' ? {} : {type:'hacer'}));
   return x;
 }
 
@@ -263,7 +265,6 @@ function parseLine(text){
   for(const w of text.trim().split(/\s+/)){
     if(!w) continue;
     if(w === '!'){ out.type = 'urgente'; continue; }
-    if(w === '?'){ out.type = 'reclamar'; continue; }
     if(w.length > 1 && w[0] === '@'){ out.person = w.slice(1); continue; }
     if(w.length > 1 && w[0] === '#'){ out.project = w.slice(1); continue; }
     const d = parseDateToken(w, td);
@@ -313,7 +314,7 @@ const isClaim = (t, td) => t.waiting && remindOf(t) <= td;
 function passes(t){
   const f = UI.filter;
   if(f.kind === 'mine' && t.personId !== 'me') return false;
-  if(f.kind === 'claim' && !(t.type === 'reclamar' || t.waiting)) return false;
+  if(f.kind === 'claim' && !(t.personId !== 'me' || t.waiting)) return false;
   if(f.programId || f.projectId){
     const pr = S.projects.find(p => p.id === t.projectId);
     if(!pr) return false;
@@ -334,16 +335,13 @@ function personChip(t, act){
   const st = p.color === 'black' ? '' : ` style="background:${(PAL[p.color]||PAL.slate)[0]};color:${(PAL[p.color]||PAL.slate)[1]}"`;
   return `<button class="chip${p.color === 'black' ? ' me' : ''}" data-act="person"${st} aria-label="Persona: ${esc(p.name)}">${esc(p.name)}</button>`;
 }
-function dotHtml(t, td, s9){
-  const ty = (isClaim(t,td) && t.type === 'hacer') ? 'reclamar' : t.type;
-  return `<button class="dot ${ty}${s9 ? ' s9' : ''}" data-act="rot" aria-label="Tipo: ${t.type}. Cambiar"></button>`;
-}
+const other = (t, td) => t.personId !== 'me' || isClaim(t,td);
 const dcls = (t, td) => t.waiting ? '' : t.date < td ? ' late' : t.date > td ? ' fut' : '';
 function cardHtml(t, td){
   const claim = isClaim(t,td), pr = project(t.projectId);
-  return `<div class="card ${t.type}${claim ? ' claim' : ''}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
-    <div class="c-top">${dotHtml(t,td)}<span class="title" data-act="edit" title="Clic para editar">${esc(t.title)}</span>
-      ${claim ? `<span class="claimtxt">reclamar · desde ${dm(remindOf(t))}</span>` : `<button class="dtxt${dcls(t,td)}" data-act="date">${fmtDate(t.date)}</button>`}</div>
+  return `<div class="card ${t.type}${other(t,td) ? ' other' : ''}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
+    <div class="c-top"><span class="title" data-act="edit" title="Clic para editar">${esc(t.title)}</span>
+      ${claim ? `<span class="dtxt late" style="margin-top:3px">desde ${+remindOf(t).slice(8)}/${+remindOf(t).slice(5,7)}</span>` : `<button class="dtxt${dcls(t,td)}" data-act="date">${fmtDate(t.date)}</button>`}</div>
     <div class="c-meta">${personChip(t)}
       ${pr ? `<button class="chip proj" data-act="proj">${esc(pr.name)}</button>` : `<button class="chip proj" data-act="proj" aria-label="Asignar proyecto">#</button>`}
       <span class="c-btns"><button data-act="tmr" aria-label="Mover a mañana" title="Mañana (M)">→ mañ</button><button data-act="fri" aria-label="Mover a esta semana" title="Esta semana (S)">→ vie</button><button data-act="wait" aria-label="Pasar a esperando" title="Esperando (E)">⏸ espera</button><button class="ok" data-act="done" aria-label="Marcar como hecha" title="Hecha (X)">✓</button></span></div>
@@ -351,8 +349,8 @@ function cardHtml(t, td){
 }
 function rowHtml(t, td, col){
   const dtxt = col === 'waiting' ? `reclamar ${fmtDate(remindOf(t))}` : fmtDate(t.date);
-  return `<div class="row ${t.type}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
-    <div class="r1">${dotHtml(t,td,true)}<span class="title" data-act="edit" title="${esc(t.title)}">${esc(t.title)}</span></div>
+  return `<div class="row ${t.type}${other(t,td) ? ' other' : ''}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
+    <div class="r1"><span class="title" data-act="edit" title="${esc(t.title)}">${esc(t.title)}</span></div>
     <div class="r2">${personChip(t)}<button class="dtxt${col === 'waiting' ? '' : dcls(t,td)}" data-act="date">${dtxt}</button></div>
     <div class="hb"><button data-act="sun" aria-label="A Hoy">☀</button>${col === 'tomorrow' ? '' : '<button data-act="tmr">→ mañ</button>'}<button data-act="wait" aria-label="Esperar">⏸</button><button data-act="done" aria-label="Hecha">✓</button></div>
   </div>`;
@@ -378,7 +376,7 @@ function renderFoot(){
   else if(f.state === 'err') st = `<span style="color:var(--red)">Error con ${esc(f.name)}</span> · <button class="linkbtn" data-act="perm">reintentar</button>`;
   else st = 'Solo navegador · vincular archivo en Ajustes';
   document.getElementById('foot').innerHTML =
-    `<span><span class="lg"><i style="background:var(--dot-do)"></i>hacer</span><span class="lg"><i style="background:var(--amber)"></i>reclamar</span><span class="lg"><i style="background:var(--red)"></i>urgente</span><span class="lg">· chip de color = persona</span></span><span class="sp"></span><span>${st}</span>`;
+    `<span><span class="lg"><i style="background:var(--red)"></i>urgente</span><span class="lg"><i style="background:var(--claim-bg);border:1px solid var(--wait-line)"></i>de otra persona / reclamo</span><span class="lg">· chip de color = persona</span></span><span class="sp"></span><span>${st}</span>`;
 }
 function render(){
   closePop();
@@ -393,7 +391,7 @@ function render(){
   if(UI.sel && !UI.order.includes(UI.sel)) UI.sel = null;
   const n = cols.today.length, warn = n > S.settings.warnToday;
   const todayHtml = `<section class="today" data-drop="today">
-    <div class="colhead">Hoy <span class="count${warn ? ' warn' : ''}">${n}${warn ? ' · demasiadas, reparte' : ''}</span></div>
+    <div class="colhead">Hoy <span class="count${warn ? ' warn' : ''}">${n === 1 ? "1 tarea" : n + " tareas"}${warn ? ' · demasiadas, reparte' : ''}</span></div>
     <div class="list">${n ? cols.today.map(t => cardHtml(t,td)).join('') : '<div class="empty">Nada para hoy.</div>'}</div></section>`;
   const rest = COLS.slice(1).map(c => `<section class="col${c.k === 'waiting' ? ' waiting' : ''}" data-drop="${c.k}">
     <div class="colhead">${c.n} <span class="count">${cols[c.k].length}</span></div>
@@ -536,8 +534,7 @@ function action(act, id){
     case 'tmr': moveTo(id,'tomorrow'); break;
     case 'fri': moveTo(id,'week'); break;
     case 'wait': moveTo(id,'waiting'); break;
-    case 'sun': { const w = t.waiting; moveTo(id,'today'); if(w) t.type = 'reclamar'; break; }
-    case 'rot': t.type = TYPES[(TYPES.indexOf(t.type)+1)%3]; break;
+    case 'sun': moveTo(id,'today'); break;
     case 'done': return doDone(id);
   }
   commit();
@@ -584,15 +581,16 @@ function popProject(anchor, id){
   openPop(anchor, html, v => { taskById(id).projectId = v || null; commit(); });
 }
 function popDate(anchor, id){
-  const t = taskById(id);
+  const t = taskById(id), w = t.waiting, cur = w ? remindOf(t) : t.date;
   const html = `<div class="qd"><button data-v="hoy">hoy</button><button data-v="man">mañ</button><button data-v="vie">vie</button><button data-v="lun">lun</button></div>
-    <input type="date" value="${t.date}" aria-label="Fecha">`;
+    <input type="date" value="${cur}" aria-label="${w ? 'Reclamar el' : 'Fecha'}">`;
   openPop(anchor, html, v => {
     const td = today(); let d = v;
     if(v === 'hoy') d = td; else if(v === 'man') d = addDays(td,1);
     else if(v === 'vie') d = addDays(td,(4-dow(td)+7)%7); else if(v === 'lun') d = addDays(td,(7-dow(td))%7);
     if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
-    Object.assign(t,{date:d,waiting:false,remindOn:null}); commit();
+    if(w) t.remindOn = d; else Object.assign(t,{date:d,waiting:false,remindOn:null});
+    commit();
   });
 }
 
@@ -708,7 +706,7 @@ function openPanel(id){
     <label>Título<input type="text" data-f="title" value="${esc(t.title)}"></label>
     <label>Persona<select data-f="personId">${opts(S.people.map(p => [p.id,p.name]), t.personId)}</select></label>
     <label>Proyecto<select data-f="projectId">${prj}</select></label>
-    <label>Tipo<select data-f="type">${opts([['hacer','Hacer'],['reclamar','Reclamar'],['urgente','Urgente']], t.type)}</select></label>
+    <label>Tipo<select data-f="type">${opts([['hacer','Normal'],['urgente','Urgente']], t.type)}</select></label>
     <label>Fecha<input type="date" data-f="date" value="${t.date}"></label>
     <label class="ck"><input type="checkbox" data-f="waiting"${t.waiting ? ' checked' : ''}> Esperando</label>
     ${t.waiting ? `<label>Reclamar el<input type="date" data-f="remindOn" value="${remindOf(t)}"></label>` : ''}
@@ -757,7 +755,7 @@ function openDone(){
 }
 function openKeys(){
   UI.modal = 'keys';
-  const rows = [['N','Enfocar línea rápida'],['/','Buscar'],['?','Esta tabla'],['↑ ↓','Seleccionar fila'],['H','Mover a Hoy'],['M','Mañana'],['S','Esta semana (viernes)'],['P','Próxima semana (lunes)'],['L','Más adelante (+30 días)'],['E','Esperando'],['X / Supr','Hecha'],['Intro','Abrir panel de edición'],['Esc','Deseleccionar / cerrar']];
+  const rows = [['N','Enfocar línea rápida'],['/','Buscar'],['?','Esta tabla'],['↑ ↓','Seleccionar fila'],['H','Mover a Hoy'],['M','Mañana'],['S','Esta semana (viernes)'],['P','Próxima semana (lunes)'],['L','Más adelante (+30 días)'],['E','Esperando'],['X / Supr','Hecha'],['U','Marcar / quitar urgente'],['Intro','Abrir panel de edición'],['Esc','Deseleccionar / cerrar']];
   showModal(`<h2>Atajos${closeBtn}</h2><table class="keys">${rows.map(r => `<tr><td><kbd>${r[0]}</kbd></td><td>${r[1]}</td></tr>`).join('')}</table>`);
 }
 function openSettings(){
@@ -893,7 +891,7 @@ board.addEventListener('click', e => {
 });
 board.addEventListener('dblclick', e => {
   const row = e.target.closest('[data-id]');
-  if(!row || e.target.closest('.dot,.chip,.dtxt,.c-btns,.hb')) return;
+  if(!row || e.target.closest('.chip,.dtxt,.c-btns,.hb')) return;
   if(ED){ ED.done = true; ED = null; acClose(); }
   UI.sel = row.dataset.id; render(); openPanel(row.dataset.id);
 });
@@ -958,6 +956,7 @@ document.addEventListener('keydown', e => {
   const id = UI.sel; if(!id || !taskById(id)) return;
   const map = {h:'today',m:'tomorrow',s:'week',p:'next',l:'later',e:'waiting'};
   if(map[lk]){ e.preventDefault(); moveTo(id, map[lk]); commit(); }
+  else if(lk === 'u'){ e.preventDefault(); const t = taskById(id); t.type = t.type === 'urgente' ? 'hacer' : 'urgente'; commit(); }
   else if(lk === 'x' || k === 'Delete'){ e.preventDefault(); doDone(id); }
   else if(k === 'Enter'){ e.preventDefault(); openPanel(id); }
 });
