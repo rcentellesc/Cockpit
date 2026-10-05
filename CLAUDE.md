@@ -84,6 +84,8 @@ Un input. Intro crea la tarea y vacía el input. Sintaxis, en cualquier orden:
 - `#proyecto` idéntico, con "Crear proyecto: xxx" (pide el programa en un desplegable pequeño).
 - Fecha: `hoy`, `mañ`/`mañana`, `lun`…`dom` (próximo día de esa semana; si es hoy, hoy), `12/10`, `12/10/26`, `+3` (días), `nov`/`dic`… (día 1 del mes). Admite acentos y mayúsculas.
 - `!` urgente. Sin marca: hacer. (`?` no tiene significado.)
+- `Ctrl+Intro` en vez de `Intro` crea la tarea directamente en Hoy.
+- Al crear: urgente sin fecha explícita → `date = hoy`. Persona ≠ Yo (y no urgente) → entra en Esperando con `remindOn = fecha explícita` o, si no hay, `hoy + waitDays`.
 - Sin `@`: persona Yo. Sin fecha: según `settings.captureIn` (por defecto `week` = viernes de esta semana; si hoy es viernes o después, viernes de la siguiente). Opciones: today, tomorrow, week, nextweek.
 
 Lo que queda después de extraer los tokens es el título, recortado.
@@ -95,7 +97,7 @@ Tres caminos, los tres cambian `date`/`waiting`:
 - **Teclado** con una fila seleccionada (clic o flechas arriba/abajo): `H` hoy · `M` mañana · `S` esta semana (viernes) · `P` próxima semana (lunes) · `L` más adelante (+30 días) · `E` esperando · `X` o `Supr` hecha · `Intro` abrir edición · `Esc` deseleccionar.
 - **Arrastre** entre columnas: soltar en Mañana → hoy+1; Esta semana → viernes de esta semana (si hoy ≥ viernes, viernes siguiente); Próxima semana → lunes siguiente; Más adelante → +30 días; Esperando → `waiting=true`, `remindOn = hoy + settings.waitDays`; Hoy → hoy. Dentro de Hoy, arrastrar reordena (`order`).
 
-Pasar a Esperando desde botón o tecla usa `remindOn = hoy + waitDays`. Sol en una tarea de Esperando = reclamar ya: `waiting=false`, `date=hoy`. Tecla `U` alterna urgente.
+Pasar a Esperando (botón, tecla, arrastre, panel o al crear) usa `remindOn = hoy + waitDays`; si cae en sábado o domingo, pasa al lunes siguiente. Sol en una tarea de Esperando = reclamar ya: `waiting=false`, `date=hoy`. Tecla `U` o botón `!` alterna urgente; al marcar urgente, `date = hoy` y sale de Esperando.
 
 Hecha: `done=true, doneAt=ahora`; desaparece de las columnas. Botón "Hechas (N)" muestra una lista con fecha y permite recuperar. Las hechas de más de 90 días se pueden purgar desde Ajustes.
 

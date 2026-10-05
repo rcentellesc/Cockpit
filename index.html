@@ -76,6 +76,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .c-btns{display:flex;gap:4px;margin-left:auto}
 .c-btns button{height:26px;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:4px;padding:0 8px;font-size:11.5px}
 .c-btns button:hover{background:var(--hover)}
+.c-btns .urgon{background:var(--red);border-color:var(--red);color:#fff}
 .c-btns .ok{background:var(--text);color:var(--bg);border-color:var(--text);padding:0 10px}
 .claimtxt{color:var(--amber);font-size:12px;font-weight:600}
 .chip{border:0;border-radius:10px;padding:2px 9px;font-size:12px;font-weight:500;line-height:1.35;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -155,8 +156,8 @@ kbd{background:var(--hover);border:1px solid var(--line);border-radius:4px;paddi
   <button class="btn" id="btnSet">Ajustes</button>
 </header>
 <div class="quick">
-  <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Nueva tarea…  ej: Pedir presupuesto @Marta #Norte vie !" aria-label="Línea rápida">
-  <div class="help"><b>@</b>persona · <b>#</b>proyecto · <b>hoy mañ lun…dom 12/10 +3 nov</b> fecha · <b>!</b> urgente &nbsp;|&nbsp; <kbd>N</kbd> nueva · <kbd>/</kbd> buscar · <kbd>?</kbd> atajos · con fila seleccionada: <kbd>H</kbd> <kbd>M</kbd> <kbd>S</kbd> <kbd>P</kbd> <kbd>L</kbd> <kbd>E</kbd> <kbd>U</kbd> <kbd>X</kbd></div>
+  <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Nueva tarea…  ej: Pedir presupuesto @Julia #Core vie !" aria-label="Línea rápida">
+  <div class="help"><b>@</b>persona · <b>#</b>proyecto · <b>hoy mañ lun…dom 12/10 +3 nov</b> fecha · <b>!</b> urgente · <kbd>Ctrl</kbd>+<kbd>Intro</kbd> a Hoy &nbsp;|&nbsp; <kbd>N</kbd> nueva · <kbd>/</kbd> buscar · <kbd>?</kbd> atajos · con fila seleccionada: <kbd>H</kbd> <kbd>M</kbd> <kbd>S</kbd> <kbd>P</kbd> <kbd>L</kbd> <kbd>E</kbd> <kbd>U</kbd> <kbd>X</kbd></div>
 </div>
 <main id="board"></main>
 <footer id="foot"></footer>
@@ -302,7 +303,12 @@ function defaultDate(){
 }
 
 /* ======================= COLUMNAS ======================= */
-function remindOf(t){ return t.remindOn || addDays(today(), S.settings.waitDays); }
+function waitDate(td){
+  td = td || today();
+  const d = addDays(td, S.settings.waitDays), w = dow(d);
+  return w === 5 ? addDays(d,2) : w === 6 ? addDays(d,1) : d;   // sáb/dom -> lunes
+}
+function remindOf(t){ return t.remindOn || waitDate(); }
 function colOf(t, td){
   if(t.waiting) return remindOf(t) <= td ? 'today' : 'waiting';
   if(t.date <= td) return 'today';
@@ -346,7 +352,7 @@ function cardHtml(t, td){
       ${claim ? `<span class="dtxt late" style="margin-top:3px">desde ${+remindOf(t).slice(8)}/${+remindOf(t).slice(5,7)}</span>` : `<button class="dtxt${dcls(t,td)}" data-act="date">${fmtDate(t.date)}</button>`}</div>
     <div class="c-meta">${personChip(t)}
       ${pr ? `<button class="chip proj" data-act="proj">${esc(pr.name)}</button>` : `<button class="chip proj" data-act="proj" aria-label="Asignar proyecto">#</button>`}
-      <span class="c-btns"><button data-act="tmr" aria-label="Mover a mañana" title="Mañana (M)">→ mañ</button><button data-act="fri" aria-label="Mover a esta semana" title="Esta semana (S)">→ vie</button><button data-act="wait" aria-label="Pasar a esperando" title="Esperando (E)">⏸ espera</button><button class="ok" data-act="done" aria-label="Marcar como hecha" title="Hecha (X)">✓</button></span></div>
+      <span class="c-btns"><button data-act="tmr" aria-label="Mover a mañana" title="Mañana (M)">→ mañ</button><button data-act="fri" aria-label="Mover a esta semana" title="Esta semana (S)">→ vie</button><button data-act="wait" aria-label="Pasar a esperando" title="Esperando (E)">⏸ espera</button><button class="${t.type === 'urgente' ? 'urgon' : ''}" data-act="urg" aria-label="Urgente" title="Urgente (U)">!</button><button class="ok" data-act="done" aria-label="Marcar como hecha" title="Hecha (X)">✓</button></span></div>
   </div>`;
 }
 function rowHtml(t, td, col){
@@ -354,7 +360,7 @@ function rowHtml(t, td, col){
   return `<div class="row ${t.type}${other(t,td) ? ' other' : ''}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
     <div class="r1"><span class="title" data-act="edit" title="${esc(t.title)}">${esc(t.title)}</span></div>
     <div class="r2">${personChip(t)}<button class="dtxt${col === 'waiting' ? '' : dcls(t,td)}" data-act="date">${dtxt}</button></div>
-    <div class="hb"><button data-act="sun" aria-label="A Hoy">☀</button>${col === 'tomorrow' ? '' : '<button data-act="tmr">→ mañ</button>'}<button data-act="wait" aria-label="Esperar">⏸</button><button data-act="done" aria-label="Hecha">✓</button></div>
+    <div class="hb"><button data-act="sun" aria-label="A Hoy">☀</button>${col === 'tomorrow' ? '' : '<button data-act="tmr">→ mañ</button>'}<button data-act="wait" aria-label="Esperar">⏸</button><button data-act="urg" aria-label="Urgente" title="Urgente (U)">!</button><button data-act="done" aria-label="Hecha">✓</button></div>
   </div>`;
 }
 function renderFilters(){
@@ -506,9 +512,13 @@ function moveTo(id, col){
     case 'week': p.date = friday(td); break;
     case 'next': p.date = nextMonday(td); break;
     case 'later': p.date = addDays(td,30); break;
-    case 'waiting': p.waiting = true; p.remindOn = addDays(td, S.settings.waitDays); break;
+    case 'waiting': p.waiting = true; p.remindOn = waitDate(td); break;
   }
   Object.assign(t, p);
+}
+function setUrgent(t, v){
+  t.type = v ? 'urgente' : 'hacer';
+  if(v){ t.date = today(); t.waiting = false; t.remindOn = null; }
 }
 function setDone(id, v){
   const t = taskById(id); if(!t) return;
@@ -537,16 +547,21 @@ function action(act, id){
     case 'fri': moveTo(id,'week'); break;
     case 'wait': moveTo(id,'waiting'); break;
     case 'sun': moveTo(id,'today'); break;
+    case 'urg': setUrgent(t, t.type !== 'urgente'); break;
     case 'done': return doDone(id);
   }
   commit();
 }
-function createFromLine(text){
-  const p = parseLine(text), r = resolve(p);
+function createFromLine(text, toToday){
+  const p = parseLine(text);
+  if(toToday) p.date = today();
+  const r = resolve(p);
   if(r.bad.length){ toast('No existe: ' + r.bad.join(' ') + ' · elígelo en el desplegable'); return false; }
   if(!p.title){ toast('Falta el título'); return false; }
   const t = Object.assign({id:uid('t'),title:p.title,personId:'me',projectId:null,type:'hacer',date:defaultDate(),waiting:false,remindOn:null,
     note:'',order:maxOrder()+1,done:false,doneAt:null,createdAt:new Date().toISOString()}, r.patch);
+  if(t.type === 'urgente' && !p.date) t.date = today();
+  else if(t.personId !== 'me'){ t.waiting = true; t.remindOn = p.date || waitDate(); }
   S.tasks.push(t); commit();
   toast(`Creada · ${COLNAME[colOf(t,today())]}`);
   return true;
@@ -725,10 +740,11 @@ panelEl.addEventListener('change', e => {
   const f = e.target.dataset.f, t = taskById(UI.panel); if(!f || !t) return;
   const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
   if(f === 'projectId') t.projectId = v || null;
-  else if(f === 'waiting'){ t.waiting = v; t.remindOn = v ? addDays(today(), S.settings.waitDays) : null; }
+  else if(f === 'waiting'){ t.waiting = v; t.remindOn = v ? waitDate() : null; }
   else if(f === 'date'){ if(!v) return; t.date = v; }
   else if(f === 'remindOn'){ if(!v) return; t.remindOn = v; }
   else if(f === 'title'){ if(!v.trim()){ e.target.value = t.title; return; } t.title = v; }
+  else if(f === 'type') setUrgent(t, v === 'urgente');
   else t[f] = v;
   commit(); if(f === 'waiting') openPanel(t.id);
 });
@@ -851,7 +867,7 @@ const quick = document.getElementById('q'), search = document.getElementById('se
 attachAC(quick);
 quick.addEventListener('keydown', e => {
   if(e.defaultPrevented) return;
-  if(e.key === 'Enter'){ e.preventDefault(); if(quick.value.trim() && createFromLine(quick.value)){ quick.value = ''; acClose(); } }
+  if(e.key === 'Enter'){ e.preventDefault(); if(quick.value.trim() && createFromLine(quick.value, e.ctrlKey || e.metaKey)){ quick.value = ''; acClose(); } }
   else if(e.key === 'Escape') quick.blur();
 });
 search.addEventListener('input', () => { UI.filter.q = search.value.trim(); render(); });
@@ -958,7 +974,7 @@ document.addEventListener('keydown', e => {
   const id = UI.sel; if(!id || !taskById(id)) return;
   const map = {h:'today',m:'tomorrow',s:'week',p:'next',l:'later',e:'waiting'};
   if(map[lk]){ e.preventDefault(); moveTo(id, map[lk]); commit(); }
-  else if(lk === 'u'){ e.preventDefault(); const t = taskById(id); t.type = t.type === 'urgente' ? 'hacer' : 'urgente'; commit(); }
+  else if(lk === 'u'){ e.preventDefault(); const t = taskById(id); setUrgent(t, t.type !== 'urgente'); commit(); }
   else if(lk === 'x' || k === 'Delete'){ e.preventDefault(); doDone(id); }
   else if(k === 'Enter'){ e.preventDefault(); openPanel(id); }
 });
