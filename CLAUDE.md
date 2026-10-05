@@ -115,6 +115,7 @@ Cabecera: chip "Todo", "Mías" (persona = Yo), "Reclamar" (persona ≠ Yo o wait
 ## Persistencia
 1. Siempre: `localStorage` (clave `tareas.v1`), guardado en cada cambio.
 2. Preferente: archivo `tareas.json` vinculado con File System Access API (`showSaveFilePicker` / `showOpenFilePicker`). Botón "Vincular archivo" en Ajustes; el handle se guarda en IndexedDB para no pedirlo cada vez; al abrir se pide permiso si hace falta. Guardado en cada cambio, con debounce 500 ms. Si hay archivo y localStorage, manda el archivo.
+   Si hay cambios sin guardar en el archivo (sin permiso o error de escritura): aviso rojo en el pie, `beforeunload` al cerrar, y al conceder permiso con cambios pendientes se pregunta qué versión conservar. El primer clic de la sesión pide el permiso si falta.
 3. Exportar / Importar JSON manual siempre disponible en Ajustes (respaldo y para navegadores sin la API).
 
 `tareas.json` nunca se sube al repo (`.gitignore`).
