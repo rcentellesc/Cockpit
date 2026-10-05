@@ -350,7 +350,7 @@ function rowHtml(t, td, col){
   return `<div class="row ${t.type}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
     <div class="r1">${dotHtml(t,td,true)}<span class="title" data-act="edit" title="${esc(t.title)}">${esc(t.title)}</span></div>
     <div class="r2">${personChip(t)}<button class="dtxt${late ? ' late' : ''}" data-act="date">${dtxt}</button></div>
-    <div class="hb"><button data-act="sun" aria-label="A Hoy">☀</button><button data-act="tmr">→ mañ</button><button data-act="wait" aria-label="Esperar">⏸</button><button data-act="done" aria-label="Hecha">✓</button></div>
+    <div class="hb"><button data-act="sun" aria-label="A Hoy">☀</button>${col === 'tomorrow' ? '' : '<button data-act="tmr">→ mañ</button>'}<button data-act="wait" aria-label="Esperar">⏸</button><button data-act="done" aria-label="Hecha">✓</button></div>
   </div>`;
 }
 function renderFilters(){
