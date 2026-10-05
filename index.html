@@ -101,7 +101,10 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .row .r2{display:flex;gap:6px;align-items:center;margin:3px 0 0 0;min-width:0;font-size:11px}
 .row .r2 .chip{font-size:11px;font-weight:400;padding:1px 7px;border-radius:9px}
 .row .r2 .chip.noproj{padding:0 6px}
-.row .r2 .dtxt{margin-left:auto;font-size:11px}
+.row .r2 .chip{flex:0 1 auto;min-width:0}
+.row .r2 .chip.me,.row .r2 .chip[style]{flex:none}
+.row .r2 .chip.proj{padding:0 6px;border-radius:4px}
+.row .r2 .dtxt{margin-left:auto;font-size:11px;white-space:nowrap;flex:none}
 .hb{display:none;position:absolute;right:3px;top:3px;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:1px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .row:hover .hb,.row.sel .hb{display:flex}
 .hb button{border:0;background:none;border-radius:5px;padding:1px 6px;font-size:11px;color:var(--muted)}
@@ -361,7 +364,7 @@ function rowHtml(t, td, col){
   const dtxt = col === 'waiting' ? `reclamar ${fmtDate(remindOf(t))}` : fmtDate(t.date);
   return `<div class="row ${t.type}${other(t,td) ? ' other' : ''}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
     <div class="r1"><span class="title" data-act="edit" title="${esc(t.title)}">${esc(t.title)}</span></div>
-    <div class="r2">${personChip(t)}${project(t.projectId) ? '' : `<button class="chip noproj" data-act="proj" aria-label="Sin proyecto: asignar" title="Sin proyecto">sin proy.</button>`}<button class="dtxt${col === 'waiting' ? '' : dcls(t,td)}" data-act="date">${dtxt}</button></div>
+    <div class="r2">${personChip(t)}${project(t.projectId) ? `<button class="chip proj" data-act="proj" title="${esc(project(t.projectId).name)}">${esc(project(t.projectId).name)}</button>` : `<button class="chip noproj" data-act="proj" aria-label="Sin proyecto: asignar" title="Sin proyecto">sin proy.</button>`}<button class="dtxt${col === 'waiting' ? '' : dcls(t,td)}" data-act="date">${dtxt}</button></div>
     <div class="hb"><button data-act="sun" aria-label="A Hoy">☀</button>${col === 'tomorrow' ? '' : '<button data-act="tmr">→ mañ</button>'}<button data-act="wait" aria-label="Esperar">⏸</button><button data-act="urg" aria-label="Urgente" title="Urgente (U)">!</button><button data-act="done" aria-label="Hecha">✓</button></div>
   </div>`;
 }
