@@ -72,7 +72,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .c-top .title{font-size:16px;line-height:1.3;flex:1;word-break:break-word;cursor:text}
 .c-top .dtxt{margin-top:1px;flex:none}
 .urgente .title{font-weight:600}
-.c-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;font-size:12px}
+.c-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 0 22px;font-size:12px}
 .c-btns{display:flex;gap:4px;margin-left:auto}
 .c-btns button{height:26px;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:4px;padding:0 8px;font-size:11.5px}
 .c-btns button:hover{background:var(--hover)}
@@ -81,7 +81,10 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .claimtxt{color:var(--amber);font-size:12px;font-weight:600}
 .chip{border:0;border-radius:10px;padding:2px 9px;font-size:12px;font-weight:500;line-height:1.35;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip.me{background:var(--me-bg);color:var(--me-fg)}
-.chip.noproj{background:#f8dde6;color:#8c2f52;border:1px dashed #8c2f52;font-weight:500}
+button.dot{flex:none;border:0;padding:0;border-radius:50%;width:12px;height:12px;margin-top:6px;position:relative}
+button.dot::after{content:"";position:absolute;inset:-6px}
+button.dot.nop{background:#f8dde6;border:1.5px dashed #8c2f52}
+.row button.dot{width:9px;height:9px;margin-top:5px}
 .chip.proj{background:var(--bg);border-radius:4px;padding:2px 8px;color:var(--muted);font-weight:400}
 .dtxt{background:none;border:0;padding:0 2px;color:var(--muted);font-size:12px;border-radius:4px}
 .dtxt:hover{background:var(--hover)}
@@ -98,16 +101,15 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .row.other{background:var(--claim-bg)}
 .row.urgente.other{background:var(--claim-bg)}
 .row.sel.other,.row.sel.urgente{background:var(--panel)}
-.row .r2{display:flex;gap:6px;align-items:center;margin:3px 0 0 0;min-width:0;font-size:11px}
+.row .r2{display:flex;gap:6px;align-items:center;margin:3px 0 0 16px;min-width:0;font-size:11px}
 .row .r2 .chip{font-size:11px;font-weight:400;padding:1px 7px;border-radius:9px}
-.row .r2 .chip.noproj{padding:0 6px}
 .row .r2 .chip{flex:0 1 auto;min-width:0}
 .row .r2 .chip.me,.row .r2 .chip[style]{flex:none}
 .row .r2 .chip.proj{padding:0 6px;border-radius:4px}
 .row .r2 .dtxt{margin-left:auto;font-size:11px;white-space:nowrap;flex:none}
-.hb{display:none;position:absolute;right:3px;top:3px;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:1px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.hb{display:none;position:absolute;right:3px;top:3px;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:1px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .row:hover .hb,.row.sel .hb{display:flex}
-.hb button{border:0;background:none;border-radius:5px;padding:1px 6px;font-size:11px;color:var(--muted)}
+.hb button{border:0;background:none;border-radius:5px;padding:1px 4px;font-size:10.5px;color:var(--muted)}
 .hb button:hover{background:var(--hover)}
 .inline-edit{width:100%;font-size:inherit;padding:2px 6px}
 .dragging{opacity:.4}
@@ -181,6 +183,7 @@ const PAL = {
   teal:['#d4eef0','#0f6a70'], pink:['#f8dde6','#8c2f52'], olive:['#e8ecd2','#5a6414'], slate:['#e2e5ea','#3b4756']
 };
 const PAL_NAMES = Object.keys(PAL);
+const PROG_COLORS = ['#3d7ebf','#2e9e7a','#8a5fc4','#e07b39','#1f9aa5','#d0527f','#8d9a1f','#6b7889'];
 const COLS = [
   {k:'today',n:'Hoy'},{k:'tomorrow',n:'Mañana'},{k:'week',n:'Esta semana'},
   {k:'next',n:'Próxima semana'},{k:'later',n:'Más adelante'},{k:'waiting',n:'Esperando'}
@@ -197,7 +200,7 @@ const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(
 function defaults(){
   return { v:1,
     settings:{captureIn:'week',waitDays:5,warnToday:5,theme:'light'},
-    programs:[{id:'p1',name:'General'}], projects:[],
+    programs:[{id:'p1',name:'General',color:PROG_COLORS[0]}], projects:[],
     people:[{id:'me',name:'Yo',color:'black'}], tasks:[] };
 }
 function normalize(d){
@@ -209,7 +212,8 @@ function normalize(d){
   x.people = Array.isArray(d.people) ? d.people : [];
   if(!x.people.some(p => p.id === 'me')) x.people.unshift({id:'me',name:'Yo',color:'black'});
   x.people.find(p => p.id === 'me').color = 'black';
-  if(!x.programs.length) x.programs.push({id:'p1',name:'General'});
+  if(!x.programs.length) x.programs.push({id:'p1',name:'General',color:PROG_COLORS[0]});
+  x.programs.forEach((g,i) => { if(!PROG_COLORS.includes(g.color)) g.color = PROG_COLORS[i % PROG_COLORS.length]; });
   x.tasks = d.tasks.map((t,i) => Object.assign({
     id:uid('t'),title:'',personId:'me',projectId:null,type:'hacer',date:today(),waiting:false,remindOn:null,
     note:'',order:i,done:false,doneAt:null,createdAt:new Date().toISOString()}, t, t.type === 'urgente' ? {} : {type:'hacer'}));
@@ -350,21 +354,26 @@ function personChip(t, act){
 }
 const other = (t, td) => t.personId !== 'me' || isClaim(t,td);
 const dcls = (t, td) => t.waiting ? '' : t.date < td ? ' late' : t.date > td ? ' fut' : '';
+function dotHtml(t){
+  const pr = project(t.projectId), pg = pr && S.programs.find(g => g.id === pr.programId);
+  if(!pg) return `<button class="dot nop" data-act="proj" aria-label="Sin proyecto: asignar" title="Sin proyecto · clic para asignar"></button>`;
+  return `<button class="dot" data-act="proj" style="background:${pg.color}" aria-label="Programa ${esc(pg.name)}, proyecto ${esc(pr.name)}. Cambiar proyecto" title="${esc(pg.name)} · ${esc(pr.name)}"></button>`;
+}
 function cardHtml(t, td){
   const claim = isClaim(t,td), pr = project(t.projectId);
   return `<div class="card ${t.type}${other(t,td) ? ' other' : ''}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
-    <div class="c-top"><span class="title" data-act="edit" title="Clic para editar">${esc(t.title)}</span>
+    <div class="c-top">${dotHtml(t)}<span class="title" data-act="edit" title="Clic para editar">${esc(t.title)}</span>
       ${claim ? `<span class="dtxt late" style="margin-top:3px">desde ${+remindOf(t).slice(8)}/${+remindOf(t).slice(5,7)}</span>` : `<button class="dtxt${dcls(t,td)}" data-act="date">${fmtDate(t.date)}</button>`}</div>
     <div class="c-meta">${personChip(t)}
-      ${pr ? `<button class="chip proj" data-act="proj">${esc(pr.name)}</button>` : `<button class="chip noproj" data-act="proj" aria-label="Sin proyecto: asignar" title="Sin proyecto">sin proyecto</button>`}
+      ${pr ? `<button class="chip proj" data-act="proj">${esc(pr.name)}</button>` : ''}
       <span class="c-btns"><button data-act="tmr" aria-label="Mover a mañana" title="Mañana (M)">→ mañ</button><button data-act="fri" aria-label="Mover a esta semana" title="Esta semana (S)">→ vie</button><button data-act="wait" aria-label="Pasar a esperando" title="Esperando (E)">⏸ espera</button><button class="${t.type === 'urgente' ? 'urgon' : ''}" data-act="urg" aria-label="Urgente" title="Urgente (U)">!</button><button class="ok" data-act="done" aria-label="Marcar como hecha" title="Hecha (X)">✓</button></span></div>
   </div>`;
 }
 function rowHtml(t, td, col){
   const dtxt = col === 'waiting' ? `reclamar ${fmtDate(remindOf(t))}` : fmtDate(t.date);
   return `<div class="row ${t.type}${other(t,td) ? ' other' : ''}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
-    <div class="r1"><span class="title" data-act="edit" title="${esc(t.title)}">${esc(t.title)}</span></div>
-    <div class="r2">${personChip(t)}${project(t.projectId) ? `<button class="chip proj" data-act="proj" title="${esc(project(t.projectId).name)}">${esc(project(t.projectId).name)}</button>` : `<button class="chip noproj" data-act="proj" aria-label="Sin proyecto: asignar" title="Sin proyecto">sin proy.</button>`}<button class="dtxt${col === 'waiting' ? '' : dcls(t,td)}" data-act="date">${dtxt}</button></div>
+    <div class="r1">${dotHtml(t)}<span class="title" data-act="edit" title="${esc(t.title)}">${esc(t.title)}</span></div>
+    <div class="r2">${personChip(t)}${project(t.projectId) ? `<button class="chip proj" data-act="proj" title="${esc(project(t.projectId).name)}">${esc(project(t.projectId).name)}</button>` : ''}<button class="dtxt${col === 'waiting' ? '' : dcls(t,td)}" data-act="date">${dtxt}</button></div>
     <div class="hb"><button data-act="sun" aria-label="A Hoy">☀</button>${col === 'tomorrow' ? '' : '<button data-act="tmr">→ mañ</button>'}<button data-act="wait" aria-label="Esperar">⏸</button><button data-act="urg" aria-label="Urgente" title="Urgente (U)">!</button><button data-act="done" aria-label="Hecha">✓</button></div>
   </div>`;
 }
@@ -374,7 +383,7 @@ function renderFilters(){
     <button class="fchip${f.kind === 'mine' ? ' on' : ''}" data-f="mine">Mías</button>
     <button class="fchip${f.kind === 'claim' ? ' on' : ''}" data-f="claim">Reclamar</button>`;
   if(S.programs.length) h += '<span class="fsep"></span>';
-  h += S.programs.map(p => `<button class="fchip${f.programId === p.id ? ' on' : ''}" data-f="prg" data-id="${p.id}">${esc(p.name)}</button>`).join('');
+  h += S.programs.map(p => `<button class="fchip${f.programId === p.id ? ' on' : ''}" data-f="prg" data-id="${p.id}"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:6px"></i>${esc(p.name)}</button>`).join('');
   if(f.programId){
     const prs = S.projects.filter(p => p.programId === f.programId).sort((a,b) => (b.fav?1:0)-(a.fav?1:0));
     h += '<span class="fsep"></span>' + prs.map(p => `<button class="fchip sub${f.projectId === p.id ? ' on' : ''}" data-f="prj" data-id="${p.id}">${p.fav ? '★ ' : ''}${esc(p.name)}</button>`).join('');
@@ -389,7 +398,7 @@ function renderFoot(){
   else if(f.state === 'err') st = `<span style="color:var(--red)">No se pudo guardar en ${esc(f.name)}${dirty ? ' · cambios sin guardar' : ''}</span> · <button class="linkbtn" data-act="perm">reintentar</button>`;
   else st = 'Solo navegador · vincular archivo en Ajustes';
   document.getElementById('foot').innerHTML =
-    `<span><span class="lg"><i style="background:var(--red)"></i>urgente</span><span class="lg"><i style="background:var(--claim-bg);border:1px solid var(--wait-line)"></i>de otra persona / reclamo</span><span class="lg"><i style="background:#f8dde6;border:1px dashed #8c2f52"></i>sin proyecto</span><span class="lg">· chip de color = persona</span></span><span class="sp"></span><span>${st}</span>`;
+    `<span><span class="lg"><i style="background:var(--red)"></i>urgente</span><span class="lg"><i style="background:var(--claim-bg);border:1px solid var(--wait-line)"></i>de otra persona / reclamo</span>${S.programs.map(g => `<span class="lg"><i style="background:${g.color}"></i>${esc(g.name)}</span>`).join('')}<span class="lg"><i style="background:#f8dde6;border:1px dashed #8c2f52"></i>sin proyecto</span><span class="lg">· chip de color = persona</span></span><span class="sp"></span><span>${st}</span>`;
 }
 function render(){
   closePop();
@@ -808,7 +817,9 @@ function openSettings(){
   }).join('');
   const prgs = S.programs.map(pg => {
     const prs = S.projects.filter(p => p.programId === pg.id);
-    return `<div class="grp"><div class="frow"><input type="text" data-gn="${pg.id}" value="${esc(pg.name)}" aria-label="Programa">
+    return `<div class="grp"><div class="frow"><i style="width:12px;height:12px;border-radius:50%;background:${pg.color};display:inline-block"></i>
+      <input type="text" data-gn="${pg.id}" value="${esc(pg.name)}" aria-label="Programa">
+      <select data-gc="${pg.id}" aria-label="Color del programa">${PROG_COLORS.map((c,i) => `<option value="${c}"${c === pg.color ? ' selected' : ''}>Color ${i+1}</option>`).join('')}</select>
       <button class="btn" data-m="gdel" data-id="${pg.id}"${prs.length || S.programs.length < 2 ? ' disabled' : ''}>Borrar programa</button></div>
       ${prs.map(p => `<div class="frow sub"><button class="btn" data-m="fav" data-id="${p.id}" aria-label="Favorito">${p.fav ? '★' : '☆'}</button>
         <input type="text" data-jn="${p.id}" value="${esc(p.name)}" aria-label="Proyecto">
@@ -846,6 +857,7 @@ modalEl.addEventListener('change', e => {
   const nm = v.trim();
   if(d.pn){ if(nm){ S.people.find(p => p.id === d.pn).name = nm; commit(); } }
   else if(d.pc){ S.people.find(p => p.id === d.pc).color = v; commit(); openSettings(); }
+  else if(d.gc){ S.programs.find(p => p.id === d.gc).color = v; commit(); openSettings(); }
   else if(d.gn){ if(nm){ S.programs.find(p => p.id === d.gn).name = nm; commit(); } }
   else if(d.jn){ if(nm){ S.projects.find(p => p.id === d.jn).name = nm; commit(); } }
   else if(d.jp){ S.projects.find(p => p.id === d.jp).programId = v; commit(); openSettings(); }
@@ -859,7 +871,7 @@ modalEl.addEventListener('click', e => {
     case 'undo': setDone(id,false); commit(); openDone(); break;
     case 'pdel': S.people = S.people.filter(p => p.id !== id); commit(); openSettings(); break;
     case 'padd': { const n = val('#newPerson'); if(n){ addPerson(n); commit(); openSettings(); } break; }
-    case 'gadd': { const n = val('#newProg'); if(n){ S.programs.push({id:uid('p'),name:n}); commit(); openSettings(); } break; }
+    case 'gadd': { const n = val('#newProg'); if(n){ S.programs.push({id:uid('p'),name:n,color:PROG_COLORS.find(c => !S.programs.some(g => g.color === c)) || PROG_COLORS[S.programs.length % PROG_COLORS.length]}); commit(); openSettings(); } break; }
     case 'gdel': S.programs = S.programs.filter(p => p.id !== id); if(UI.filter.programId === id) UI.filter.programId = UI.filter.projectId = null; commit(); openSettings(); break;
     case 'jadd': { const n = val(`[data-ja="${id}"]`); if(n){ addProject(n,id); commit(); openSettings(); } break; }
     case 'jdel': S.projects = S.projects.filter(p => p.id !== id); if(UI.filter.projectId === id) UI.filter.projectId = null; commit(); openSettings(); break;
@@ -928,7 +940,7 @@ board.addEventListener('click', e => {
 });
 board.addEventListener('dblclick', e => {
   const row = e.target.closest('[data-id]');
-  if(!row || e.target.closest('.chip,.dtxt,.c-btns,.hb')) return;
+  if(!row || e.target.closest('.dot,.chip,.dtxt,.c-btns,.hb')) return;
   if(ED){ ED.done = true; ED = null; acClose(); }
   UI.sel = row.dataset.id; render(); openPanel(row.dataset.id);
 });
