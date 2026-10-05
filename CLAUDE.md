@@ -64,6 +64,8 @@ Dos dimensiones separadas:
 
 **Sin punto de tipo.** Urgente: barra roja `#c2321e` a la izquierda, título en 600 y fondo `#fff7f5`. **Tarjeta ámbar** (fondo `#faf6f1`, borde `#dccbb8`): la tarea es de otra persona (chip ≠ Yo) o es un reclamo que vuelve de Esperando. Si es urgente y de otra persona, fondo ámbar con barra roja.
 
+**Sin proyecto:** aviso en chip rosa con borde discontinuo (`#f8dde6` / `#8c2f52`), "sin proyecto" en tarjetas y "sin proy." en filas; clic abre el desplegable de proyecto.
+
 **Chip = persona**. "Depende de alguien" no es un tipo: es que el chip no es Yo, y la tarjeta se pinta ámbar. Paleta de 8, fondo claro + texto oscuro (contraste ≥ 4.5:1), asignada en orden al crear personas; Yo siempre negro/blanco:
 
 | nombre | fondo | texto |

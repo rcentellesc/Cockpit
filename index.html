@@ -81,6 +81,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .claimtxt{color:var(--amber);font-size:12px;font-weight:600}
 .chip{border:0;border-radius:10px;padding:2px 9px;font-size:12px;font-weight:500;line-height:1.35;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip.me{background:var(--me-bg);color:var(--me-fg)}
+.chip.noproj{background:#f8dde6;color:#8c2f52;border:1px dashed #8c2f52;font-weight:500}
 .chip.proj{background:var(--bg);border-radius:4px;padding:2px 8px;color:var(--muted);font-weight:400}
 .dtxt{background:none;border:0;padding:0 2px;color:var(--muted);font-size:12px;border-radius:4px}
 .dtxt:hover{background:var(--hover)}
@@ -99,6 +100,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:35% 1fr;gap:20px;pad
 .row.sel.other,.row.sel.urgente{background:var(--panel)}
 .row .r2{display:flex;gap:6px;align-items:center;margin:3px 0 0 0;min-width:0;font-size:11px}
 .row .r2 .chip{font-size:11px;font-weight:400;padding:1px 7px;border-radius:9px}
+.row .r2 .chip.noproj{padding:0 6px}
 .row .r2 .dtxt{margin-left:auto;font-size:11px}
 .hb{display:none;position:absolute;right:3px;top:3px;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:1px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .row:hover .hb,.row.sel .hb{display:flex}
@@ -351,7 +353,7 @@ function cardHtml(t, td){
     <div class="c-top"><span class="title" data-act="edit" title="Clic para editar">${esc(t.title)}</span>
       ${claim ? `<span class="dtxt late" style="margin-top:3px">desde ${+remindOf(t).slice(8)}/${+remindOf(t).slice(5,7)}</span>` : `<button class="dtxt${dcls(t,td)}" data-act="date">${fmtDate(t.date)}</button>`}</div>
     <div class="c-meta">${personChip(t)}
-      ${pr ? `<button class="chip proj" data-act="proj">${esc(pr.name)}</button>` : `<button class="chip proj" data-act="proj" aria-label="Asignar proyecto">#</button>`}
+      ${pr ? `<button class="chip proj" data-act="proj">${esc(pr.name)}</button>` : `<button class="chip noproj" data-act="proj" aria-label="Sin proyecto: asignar" title="Sin proyecto">sin proyecto</button>`}
       <span class="c-btns"><button data-act="tmr" aria-label="Mover a mañana" title="Mañana (M)">→ mañ</button><button data-act="fri" aria-label="Mover a esta semana" title="Esta semana (S)">→ vie</button><button data-act="wait" aria-label="Pasar a esperando" title="Esperando (E)">⏸ espera</button><button class="${t.type === 'urgente' ? 'urgon' : ''}" data-act="urg" aria-label="Urgente" title="Urgente (U)">!</button><button class="ok" data-act="done" aria-label="Marcar como hecha" title="Hecha (X)">✓</button></span></div>
   </div>`;
 }
@@ -359,7 +361,7 @@ function rowHtml(t, td, col){
   const dtxt = col === 'waiting' ? `reclamar ${fmtDate(remindOf(t))}` : fmtDate(t.date);
   return `<div class="row ${t.type}${other(t,td) ? ' other' : ''}${UI.sel === t.id ? ' sel' : ''}" draggable="true" data-id="${t.id}">
     <div class="r1"><span class="title" data-act="edit" title="${esc(t.title)}">${esc(t.title)}</span></div>
-    <div class="r2">${personChip(t)}<button class="dtxt${col === 'waiting' ? '' : dcls(t,td)}" data-act="date">${dtxt}</button></div>
+    <div class="r2">${personChip(t)}${project(t.projectId) ? '' : `<button class="chip noproj" data-act="proj" aria-label="Sin proyecto: asignar" title="Sin proyecto">sin proy.</button>`}<button class="dtxt${col === 'waiting' ? '' : dcls(t,td)}" data-act="date">${dtxt}</button></div>
     <div class="hb"><button data-act="sun" aria-label="A Hoy">☀</button>${col === 'tomorrow' ? '' : '<button data-act="tmr">→ mañ</button>'}<button data-act="wait" aria-label="Esperar">⏸</button><button data-act="urg" aria-label="Urgente" title="Urgente (U)">!</button><button data-act="done" aria-label="Hecha">✓</button></div>
   </div>`;
 }
@@ -384,7 +386,7 @@ function renderFoot(){
   else if(f.state === 'err') st = `<span style="color:var(--red)">No se pudo guardar en ${esc(f.name)}${dirty ? ' · cambios sin guardar' : ''}</span> · <button class="linkbtn" data-act="perm">reintentar</button>`;
   else st = 'Solo navegador · vincular archivo en Ajustes';
   document.getElementById('foot').innerHTML =
-    `<span><span class="lg"><i style="background:var(--red)"></i>urgente</span><span class="lg"><i style="background:var(--claim-bg);border:1px solid var(--wait-line)"></i>de otra persona / reclamo</span><span class="lg">· chip de color = persona</span></span><span class="sp"></span><span>${st}</span>`;
+    `<span><span class="lg"><i style="background:var(--red)"></i>urgente</span><span class="lg"><i style="background:var(--claim-bg);border:1px solid var(--wait-line)"></i>de otra persona / reclamo</span><span class="lg"><i style="background:#f8dde6;border:1px dashed #8c2f52"></i>sin proyecto</span><span class="lg">· chip de color = persona</span></span><span class="sp"></span><span>${st}</span>`;
 }
 function render(){
   closePop();
