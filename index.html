@@ -410,6 +410,7 @@ function render(){
   ['tomorrow','week','next','later'].forEach(k => cols[k].sort((a,b) => a.date.localeCompare(b.date) || (a.order||0)-(b.order||0)));
   cols.waiting.sort((a,b) => remindOf(a).localeCompare(remindOf(b)));
   UI.order = COLS.flatMap(c => cols[c.k].map(t => t.id));
+  UI.todayIds = cols.today.map(t => t.id);
   if(UI.sel && !UI.order.includes(UI.sel)) UI.sel = null;
   const n = cols.today.length, warn = n > S.settings.warnToday;
   const todayHtml = `<section class="today" data-drop="today">
@@ -560,6 +561,19 @@ function reorderToday(id, beforeId){
   if(i < 0) i = list.length;
   list.splice(i,0,t);
   list.forEach((x,k) => x.order = k);
+}
+function moveInToday(id, how){
+  const ids = UI.todayIds || [], i = ids.indexOf(id);
+  if(i < 0) return false;
+  let before;
+  if(how === 'top') before = ids[0];
+  else if(how === 'up') before = ids[i-1];
+  else before = ids[i+2] || null;
+  if(how !== 'down' && !before) return true;
+  if(how === 'down' && i === ids.length-1) return true;
+  if(before === id) return true;
+  reorderToday(id, before);
+  commit(); return true;
 }
 function dropTo(id, col, beforeId){
   moveTo(id, col);
@@ -799,7 +813,7 @@ function openDone(){
 }
 function openKeys(){
   UI.modal = 'keys';
-  const rows = [['N','Enfocar línea rápida'],['/','Buscar'],['?','Esta tabla'],['↑ ↓','Seleccionar fila'],['H','Mover a Hoy'],['M','Mañana'],['S','Esta semana (viernes)'],['P','Próxima semana (lunes)'],['L','Más adelante (+30 días)'],['E','Esperando'],['X / Supr','Hecha'],['U','Marcar / quitar urgente'],['Intro','Abrir panel de edición'],['Esc','Deseleccionar / cerrar']];
+  const rows = [['N','Enfocar línea rápida'],['/','Buscar'],['?','Esta tabla'],['↑ ↓','Seleccionar fila'],['H','Mover a Hoy'],['M','Mañana'],['S','Esta semana (viernes)'],['P','Próxima semana (lunes)'],['L','Más adelante (+30 días)'],['E','Esperando'],['X / Supr','Hecha'],['U','Marcar / quitar urgente'],['Alt + ↑ ↓','Subir / bajar la tarea dentro de Hoy'],['A','Subir la tarea al principio de Hoy'],['Intro','Abrir panel de edición'],['Esc','Deseleccionar / cerrar']];
   showModal(`<h2>Atajos${closeBtn}</h2><table class="keys">${rows.map(r => `<tr><td><kbd>${r[0]}</kbd></td><td>${r[1]}</td></tr>`).join('')}</table>`);
 }
 function openSettings(){
@@ -955,6 +969,12 @@ board.addEventListener('dragend', () => { UI.drag = null; clearMarks(); board.qu
 board.addEventListener('dragover', e => {
   const z = e.target.closest('[data-drop]'); if(!UI.drag || !z) return;
   e.preventDefault(); clearMarks(); z.classList.add('over');
+  const list = z.querySelector('.list');
+  if(list){
+    const lr = list.getBoundingClientRect(), edge = 70;
+    if(e.clientY < lr.top + edge) list.scrollTop -= Math.max(8, (lr.top + edge - e.clientY) / 3);
+    else if(e.clientY > lr.bottom - edge) list.scrollTop += Math.max(8, (e.clientY - (lr.bottom - edge)) / 3);
+  }
   const card = e.target.closest('.card');
   if(z.dataset.drop === 'today' && card && card.dataset.id !== UI.drag){
     const r = card.getBoundingClientRect();
@@ -977,8 +997,13 @@ board.addEventListener('drop', e => {
 
 /* teclado */
 document.addEventListener('keydown', e => {
-  if(e.ctrlKey || e.metaKey || e.altKey) return;
   const k = e.key, tg = e.target;
+  if(e.altKey && !e.ctrlKey && !e.metaKey && (k === 'ArrowUp' || k === 'ArrowDown')){
+    if(UI.modal || /^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName) || tg.isContentEditable || !UI.sel) return;
+    if(moveInToday(UI.sel, k === 'ArrowUp' ? 'up' : 'down')) e.preventDefault();
+    return;
+  }
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName) || tg.isContentEditable;
   if(k === 'Escape'){
     if(!acClosed()){ acClose(); return; }
@@ -1005,6 +1030,7 @@ document.addEventListener('keydown', e => {
   const id = UI.sel; if(!id || !taskById(id)) return;
   const map = {h:'today',m:'tomorrow',s:'week',p:'next',l:'later',e:'waiting'};
   if(map[lk]){ e.preventDefault(); moveTo(id, map[lk]); commit(); }
+  else if(lk === 'a'){ if(moveInToday(id, 'top')) e.preventDefault(); }
   else if(lk === 'u'){ e.preventDefault(); const t = taskById(id); setUrgent(t, t.type !== 'urgente'); commit(); }
   else if(lk === 'x' || k === 'Delete'){ e.preventDefault(); doDone(id); }
   else if(k === 'Enter'){ e.preventDefault(); openPanel(id); }
