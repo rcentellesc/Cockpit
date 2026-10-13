@@ -94,8 +94,8 @@ Lo que queda después de extraer los tokens es el título, recortado.
 Tres caminos, los tres cambian `date`/`waiting`:
 
 - **Botones** en tarjeta (descritos en Layout).
-- **Teclado** con una fila seleccionada (clic o flechas arriba/abajo): `H` hoy · `M` mañana · `S` esta semana (viernes) · `P` próxima semana (lunes) · `L` más adelante (+30 días) · `E` esperando · `X` o `Supr` hecha · `Intro` abrir edición · `Esc` deseleccionar.
-- **Arrastre** entre columnas: soltar en Mañana → hoy+1; Esta semana → viernes de esta semana (si hoy ≥ viernes, viernes siguiente); Próxima semana → lunes siguiente; Más adelante → +30 días; Esperando → `waiting=true`, `remindOn = hoy + settings.waitDays`; Hoy → hoy. Dentro de Hoy, arrastrar reordena (`order`).
+- **Teclado** con una fila seleccionada (clic o flechas arriba/abajo): `H` hoy · `M` mañana · `S` esta semana (viernes) · `P` próxima semana (lunes) · `L` más adelante (+30 días) · `E` esperando · `A` arriba del todo en Hoy · `Alt+↑/↓` subir/bajar un puesto dentro de Hoy · `X` o `Supr` hecha · `Intro` abrir edición · `Esc` deseleccionar.
+- **Arrastre** entre columnas: soltar en Mañana → hoy+1; Esta semana → viernes de esta semana (si hoy ≥ viernes, viernes siguiente); Próxima semana → lunes siguiente; Más adelante → +30 días; Esperando → `waiting=true`, `remindOn = hoy + settings.waitDays`; Hoy → hoy. Dentro de Hoy, arrastrar reordena (`order`); al arrastrar cerca del borde superior o inferior de la lista, esta se desplaza sola.
 
 Pasar a Esperando (botón, tecla, arrastre, panel o al crear) usa `remindOn = hoy + waitDays`; si cae en sábado o domingo, pasa al lunes siguiente. Sol en una tarea de Esperando = reclamar ya: `waiting=false`, `date=hoy`. Tecla `U` o botón `!` alterna urgente; al marcar urgente, `date = hoy` y sale de Esperando.
 
